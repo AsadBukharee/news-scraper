@@ -1,3 +1,4 @@
+eventlet
 python-dotenv
 anyio==3.6.2
 async-timeout==4.0.2
