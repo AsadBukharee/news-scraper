@@ -13,7 +13,7 @@ def my_task():
 
 app.conf.beat_schedule = {
     'run-every-5-minutes': {
-        'task': 'tasks.my_task',
+        'task': 'my_task',
         'schedule': crontab(minute='*/1'),
         # 'schedule': crontab(hour=17, minute=30, day_of_week='1-5'),
         # 'schedule': timedelta(seconds=10),
