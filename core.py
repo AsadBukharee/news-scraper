@@ -93,6 +93,7 @@ def get_details(g, url):
             if words < WORDS_COUNT:
                 print(f"Ignoring because of less words : {words}")
                 return None
+        print("News load success")
         return {"img": data_src, "link": final_url, "detail": article_text}
 
     except Exception as e:
