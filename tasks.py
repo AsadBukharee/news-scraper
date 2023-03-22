@@ -17,6 +17,15 @@ def news_task():
     scrap_event()
     print("===================================================")
     print(f"     Task Ended: {datetime.datetime.now().strftime('%I:%M:%S %p %d %b, %Y')} ")
+from celery import Celery
+from celery.schedules import crontab
+
+app = Celery('tasks', broker='redis://127.0.0.1:6379/0')
+
+@app.task
+def my_task():
+    print("===================================================")
+    print("                   Task Started                    ")
     print("===================================================")
 
 # Schedule the task to run every 5 minutes
@@ -32,3 +41,4 @@ app.conf.beat_schedule = {
 
 if __name__ == '__main__':
     app.start()
+
