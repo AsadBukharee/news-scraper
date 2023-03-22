@@ -4,6 +4,8 @@
 3. Celery: celery worker for background tasks.
 4. Core: core module to do the heavy scraping tasks.
 5. Subprocess: to execute celery worker as an independent process from fastapi.
+# caution 
+pip install "setuptools<58.0.0"
 
 # To DOs
 1. keep your custom values in .env file
@@ -28,7 +30,7 @@ Start the FastAPI server: uvicorn main:app --reload
 In a new terminal window, start the Celery worker: 
 you don't need to run this while using fastapi.
 
-`celery -A scraper worker --loglevel=INFO -P eventlet`
+`celery -A tasks worker --loglevel=INFO -P eventlet --beat`
 
 ### Endpoints
 
