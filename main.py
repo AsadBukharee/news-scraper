@@ -15,7 +15,7 @@ async def startup_event():
     if platform.system() == 'Windows':
         cmd = 'celery -A tasks worker --loglevel=INFO -P eventlet'
     else:
-        cmd = 'celery -A tasks worker --loglevel=INFO -P eventlet --beat'
+        cmd = 'celery -A tasks worker --loglevel=INFO  --beat'
     worker_process = subprocess.Popen(cmd, shell=True)
     print("Celery worker is started")
 
