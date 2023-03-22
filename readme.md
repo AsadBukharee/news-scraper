@@ -30,7 +30,7 @@ Start the FastAPI server: uvicorn main:app --reload
 In a new terminal window, start the Celery worker: 
 you don't need to run this while using fastapi.
 
-`celery -A scraper worker --loglevel=INFO -P eventlet`
+`celery -A tasks worker --loglevel=INFO -P eventlet --beat`
 
 ### Endpoints
 

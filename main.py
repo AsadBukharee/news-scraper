@@ -1,9 +1,9 @@
 import subprocess
 from fastapi import FastAPI
-
-from controller import get_news_redis
+from tasks import app as celery_, news_task
+from controller import get_news_redis, get_title_redis
 from models import News
-from scraper import celery_, scrape_news_task, email_sender
+import platform
 app = FastAPI()
 worker_process = None
 
@@ -11,7 +11,11 @@ worker_process = None
 async def startup_event():
     global worker_process  # Use the global variable
     print("App is started")
-    cmd = 'celery -A scraper worker --loglevel=INFO -P eventlet'
+    cmd = ''
+    if platform.system() == 'Windows':
+        cmd = 'celery -A tasks worker --loglevel=INFO -P eventlet'
+    else:
+        cmd = 'celery -A tasks worker --loglevel=INFO -P eventlet --beat'
     worker_process = subprocess.Popen(cmd, shell=True)
     print("Celery worker is started")
 
@@ -54,18 +58,16 @@ async def get_body(data: News):
 
 @app.get('/scrape-news')
 def scrape_news_endpoint(url: str='https://www.filgoal.com/articles/', min_word_count: int=200):
-    task = scrape_news_task.delay(url, min_word_count)
+    task = news_task.delay(url, min_word_count)
     return {'task_id': task.task_id}\
 
-@app.get('/send-email')
-def send_email():
-    task = email_sender.delay()
-    return {'task_id': task.task_id}
-
-
 @app.get('/get-news')
-def get_news(lates:bool=True,website='elaosboa'):
-    return get_news_redis(lates,website)
+def get_news(lates:bool=True):
+    return get_news_redis(lates)
+
+@app.get('/get-titles')
+def get_news(lates:bool=True):
+    return get_title_redis(lates)
 
 
 # # Celery setup
