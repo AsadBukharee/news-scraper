@@ -3,10 +3,14 @@ import os
 from core import scrap_event
 from celery import Celery
 from celery.schedules import crontab
+from celery.schedules import crontab
+
 INTERVAL = 30 if (os.environ.get('INTERVAL')) is None else int((os.environ.get('INTERVAL')))
 REDIS_HOST = str(os.environ.get('REDIS_HOST'))
 REDIS_PORT = int(os.environ.get('REDIS_PORT'))
+
 app = Celery('tasks', broker=f'redis://{REDIS_HOST}:{REDIS_PORT}/0')
+print(f'INTERVAL: {INTERVAL} , REDIS_HOST: {REDIS_HOST} , REDIS_PORT:{REDIS_PORT}')
 
 @app.task
 def news_task():
@@ -17,23 +21,12 @@ def news_task():
     scrap_event()
     print("===================================================")
     print(f"     Task Ended: {datetime.datetime.now().strftime('%I:%M:%S %p %d %b, %Y')} ")
-from celery import Celery
-from celery.schedules import crontab
 
-app = Celery('tasks', broker='redis://127.0.0.1:6379/0')
-
-@app.task
-def my_task():
-    print("===================================================")
-    print("                   Task Started                    ")
-    print("===================================================")
-
-# Schedule the task to run every 5 minutes
 
 app.conf.beat_schedule = {
-    'run-every-5-minutes': {
-        'task': 'tasks.my_task',
-        'schedule': crontab(minute='*/1'),
+    f'run-every-{INTERVAL}-minutes': {
+        'task': 'tasks.news_task',
+        'schedule': crontab(minute=f'*/{INTERVAL}'),
         # 'schedule': crontab(hour=17, minute=30, day_of_week='1-5'),
         # 'schedule': timedelta(seconds=10),
     },

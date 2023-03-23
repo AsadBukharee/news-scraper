@@ -57,8 +57,8 @@ async def get_body(data: News):
     return data
 
 @app.get('/scrape-news')
-def scrape_news_endpoint(url: str='https://www.filgoal.com/articles/', min_word_count: int=200):
-    task = news_task.delay(url, min_word_count)
+def scrape_news_endpoint():
+    task = news_task.delay()
     return {'task_id': task.task_id}\
 
 @app.get('/get-news')
