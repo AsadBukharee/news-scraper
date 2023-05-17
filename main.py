@@ -1,4 +1,5 @@
 import subprocess
+import sys
 from typing import List, Optional, Annotated, Union
 
 from fastapi import FastAPI, Response, Query, Depends
@@ -84,3 +85,14 @@ def get_news(news: List[str] = Depends(parse_list)):
     else:
 
         return Response(scrap_event(), media_type="text/plain")
+
+
+if __name__=="__main__":
+    news = arguments = sys.argv[1:]#['elbalad','filgoal']
+    print(news)
+    if news:
+        """scrap from the given news sources"""
+        results = scrap_custom(news)
+        print(results)
+    else:
+        print(scrap_event())
