@@ -84,8 +84,8 @@ def get_article_urls(url):
 
 def get_details(g, url):
     try:
-        if not 'https://' in url:
-            url = 'https://' + url
+        # if not 'http://' in url:
+        #     url = 'http://' + url
 
         response = requests.get(url)
         if response.status_code == 200:
@@ -187,7 +187,7 @@ def scrap_event():
         # googlenews.search('sports')
 
         # googlenews.get_news()
-        results = googlenews.results(sort=True)
+        results = googlenews.results(sort=False)
         data = []
         for result in results:
             website = result.get('link')
