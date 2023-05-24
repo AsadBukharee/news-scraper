@@ -203,7 +203,8 @@ def scrap_event():
         # news = googlenews.get_texts()
         # print("Done : ", news)
         googlenews.clear()
-        return str(data)
+        # return str(data)
+        return (data)
     except Exception as e:
         print(f"Google News failed: {e}")
 

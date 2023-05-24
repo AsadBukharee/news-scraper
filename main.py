@@ -77,14 +77,14 @@ def get_news_sites():
 @app.get("/sources")
 def get_news(news: List[str] = Depends(parse_list)):
     """ list param method """
-    print(news)
+    # print(news)
     if news:
         """scrap from the given news sources"""
         results = scrap_custom(news)
         return {"message": results}
     else:
-
-        return Response(scrap_event(), media_type="text/plain")
+        return {"message": scrap_event()}
+        # return Response(scrap_event(), media_type="text/plain")
 
 
 if __name__=="__main__":
