@@ -126,8 +126,8 @@ if __name__ == "__main__":
     if file:
         data = load_data(file)
     else:
-        data = load_data('news/18-51-38 03-06-2023.json')
-    with open(generate_file_name(prefix="failed"), "w") as failed, open(generate_file_name(prefix="news"), "w") as news_file:
+        data = load_data('news/exp.json')
+    with open(generate_file_name(prefix="failed"), "w",encoding='utf-8') as failed, open(generate_file_name(prefix="news"), "w", encoding='utf-8') as news_file:
         for index,d in enumerate(data):
             try:
                 print(f"********Going to next page [ {index+1} of {len(data)} ] **********")
