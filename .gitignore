@@ -2,3 +2,4 @@
 /news_jsons/
 /.idea/*
 /__pycache__/*
+/chromedriver.exe
