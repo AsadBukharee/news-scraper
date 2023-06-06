@@ -114,10 +114,10 @@ def get_images(div_element):
 
 def find_div_with_text(url, text):
     options = ChromeOptions()
-    # options.add_argument("--headless")  # Run Chrome in headless mode (without GUI)
+    options.add_argument("--headless")  # Run Chrome in headless mode (without GUI)
 
     try:
-        driver.get(url)
+        driver.get(url,options=options)
         # page_source = driver.page_source
         data = {}
         # if text in page_source:
