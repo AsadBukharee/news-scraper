@@ -25,9 +25,11 @@ def save_local(data):
         json.dump(data, file)
 
     print(f"JSON data saved in {filename}.")
+    return filename
 
 
 async def extract_articles():
+    print("Worker has started scraping the articles")
     browser = await launch(headless=True)
     page = await browser.newPage()
 
@@ -59,11 +61,13 @@ async def extract_articles():
             "time": article.find('time')['datetime'],
             "when": article_tags[0].find('time').text
         }
+        print(data)
         news.append(data)
     await browser.close()
-    print(news)
+    # print(news)
     print("-------------------------")
     print(len(news))
-    save_local(data=news)
+    return save_local(data=news)
 
-asyncio.get_event_loop().run_until_complete(extract_articles())
+async def get_all_from_google():
+    return await extract_articles()

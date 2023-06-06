@@ -5,6 +5,8 @@ from typing import List, Optional, Annotated, Union
 from fastapi import FastAPI, Response, Query, Depends
 from starlette.responses import StreamingResponse
 
+from all_google_sports_articles import get_all_from_google
+from brows_all import get_detaild_news_from_latest_file
 from core import scrap_event, scrap_custom,NEWS_SITES
 
 app = FastAPI()
@@ -85,6 +87,17 @@ def get_news(news: List[str] = Depends(parse_list)):
     else:
         return {"message": scrap_event()}
         # return Response(scrap_event(), media_type="text/plain")
+
+@app.get('/all-google-articles')
+async def get_news_sites():
+    name = await get_detaild_news_from_latest_file()
+    return {"message": f"file saved in news: {name}"}
+
+@app.get('/start-scraping')
+async def get_news_sites():
+    print('Request received')
+    name = await get_all_from_google()
+    return {"message": f"file saved in news: {name}"}
 
 
 if __name__=="__main__":
