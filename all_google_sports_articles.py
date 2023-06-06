@@ -71,3 +71,7 @@ async def extract_articles():
 
 async def get_all_from_google():
     return await extract_articles()
+
+
+if __name__=="__main__":
+    asyncio.run(get_all_from_google())

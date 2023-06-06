@@ -8,15 +8,17 @@ from datetime import datetime
 
 import undetected_chromedriver as uc
 
-from undetected_chromedriver import Chrome, ChromeOptions, patcher
+from undetected_chromedriver import Chrome, ChromeOptions
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
 chrome_options = ChromeOptions()
-
+chrome_options.headless=True
+chrome_options.add_argument( '--headless' )
 # Disable JavaScript execution
 chrome_options.add_argument('--disable-javascript')
+# chrome_options.add_argument("--headless")  # Run Chrome in headless mode (without GUI)
 
 
 def remove_special_characters(string):
@@ -92,7 +94,8 @@ def save_local(data):
     print(f"JSON data saved in {filename}.")
 
 
-driver = Chrome(options=chrome_options, use_subprocess=True)
+driver = Chrome(options=chrome_options, use_subprocess=True,version_main=114)
+# driver.patcher.version_main=114
 
 
 def get_images(div_element):
@@ -113,25 +116,29 @@ def get_images(div_element):
 
 
 def find_div_with_text(url, text):
-    options = ChromeOptions()
-    options.add_argument("--headless")  # Run Chrome in headless mode (without GUI)
-
     try:
-        driver.get(url,options=options)
+        driver.get(url)
         # page_source = driver.page_source
         data = {}
         # if text in page_source:
         text_xpath = f"//*[contains(text(), '{text}')]/ancestor::div"
         div_element = WebDriverWait(driver, 60).until(EC.visibility_of_element_located((By.XPATH, text_xpath)))
         article = ""
+        src=""
+        images=[]
         if div_element:
-            src = driver.current_url.split('www.')[-1].split('/')[0]
+            try:
+                src = driver.current_url.split('www.')[-1].split('/')[0]
+            except:
+                print("Problem in source website link")
             try:
                 images = get_images(div_element)
             except:
                 print("Error in getting images")
-
-            article = get_relatively_long_strings(div_element.text.split('\n'))
+            try:
+                article = get_relatively_long_strings(div_element.text.split('\n'))
+            except:
+                print("Issue in article")
 
             data = {
                 "source": src if src else "",
@@ -177,7 +184,7 @@ if __name__ == "__main__":
     else:
         directory  = 'news'
         latest_file = max(os.listdir(directory), key=lambda x: os.path.getmtime(os.path.join(directory, x)))
-        data = load_data(latest_file)
+        data = load_data(f"news/{latest_file}")
     with open(generate_file_name(prefix="failed"), "w", encoding='utf-8') as failed, open(
             generate_file_name(prefix="news"), "w", encoding='utf-8') as news_file:
         for index, d in enumerate(data):
