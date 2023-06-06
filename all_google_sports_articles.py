@@ -69,9 +69,10 @@ async def extract_articles():
     print(len(news))
     return save_local(data=news)
 
-async def get_all_from_google():
-    return await extract_articles()
+# async def get_all_from_google():
+#     return await extract_articles()
 
 
 if __name__=="__main__":
-    asyncio.run(get_all_from_google())
+    asyncio.get_event_loop().run_until_complete(extract_articles())
+    # asyncio.run(get_all_from_google())
