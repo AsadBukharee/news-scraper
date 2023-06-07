@@ -1,24 +1,23 @@
 import json
 import os
 import re
-import sys
 import statistics
+import sys
 import time
 from datetime import datetime
 
-import undetected_chromedriver as uc
-
-from undetected_chromedriver import Chrome, ChromeOptions
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
+from undetected_chromedriver import Chrome, ChromeOptions
 
 chrome_options = ChromeOptions()
-chrome_options.headless=True
-chrome_options.add_argument( '--headless' )
+# chrome_options.headless=True
+chrome_options.add_argument('--headless')
 # Disable JavaScript execution
 chrome_options.add_argument('--disable-javascript')
-# chrome_options.add_argument("--headless")  # Run Chrome in headless mode (without GUI)
+driver = Chrome(options=chrome_options, use_subprocess=True,version_main=114)
+
 
 
 def remove_special_characters(string):
@@ -61,11 +60,11 @@ def get_relatively_long_strings(string_list, threshold_factor=1.1):
 
 
 def generate_file_name(prefix="news"):
-    os.makedirs("news_detailed", exist_ok=True)
+    os.makedirs(f"news_detailed/{prefix}", exist_ok=True)
     timestamp = datetime.now().strftime("%H-%M-%S %d-%m-%Y")
 
     # Define the filename with the timestamp
-    filename = f"./news_detailed/{prefix}_{timestamp}.txt"
+    filename = f"./news_detailed/{prefix}/{prefix}_{timestamp}.txt"
     print("saving in ", filename)
     return filename
 
@@ -78,24 +77,6 @@ def load_data(file_path):
 
     # Access the loaded data
     return (data)
-
-
-def save_local(data):
-    os.makedirs("news", exist_ok=True)
-    timestamp = datetime.now().strftime("%H-%M-%S %d-%m-%Y")
-
-    # Define the filename with the timestamp
-    filename = f"./news_detailed/{timestamp}.json"
-
-    # Save the list of dictionaries in JSON format
-    with open(filename, "w") as file:
-        json.dump(data, file)
-
-    print(f"JSON data saved in {filename}.")
-
-
-driver = Chrome(options=chrome_options, use_subprocess=True,version_main=114)
-# driver.patcher.version_main=114
 
 
 def get_images(div_element):
@@ -124,8 +105,8 @@ def find_div_with_text(url, text):
         text_xpath = f"//*[contains(text(), '{text}')]/ancestor::div"
         div_element = WebDriverWait(driver, 60).until(EC.visibility_of_element_located((By.XPATH, text_xpath)))
         article = ""
-        src=""
-        images=[]
+        src = ""
+        images = []
         if div_element:
             try:
                 src = driver.current_url.split('www.')[-1].split('/')[0]
@@ -150,42 +131,16 @@ def find_div_with_text(url, text):
         print(f"{e}")
 
 
-def get_detaild_news_from_latest_file():
-    directory = "news"
-    latest_file = max(os.listdir(directory), key=lambda x: os.path.getmtime(os.path.join(directory, x)))
-    print(f"Loaded {latest_file}")
-    data = load_data(latest_file)
-    f_name = generate_file_name(prefix="failed")
-    s_name = generate_file_name(prefix="passed")
-    with open(f_name, "w", encoding='utf-8') as failed, open(s_name, "w", encoding='utf-8') as news_file:
-        for index, d in enumerate(data):
-            try:
-                print(f"********Going to next page [ {index + 1} of {len(data)} ] **********")
-                url = d.get('url')
-                text = d.get('title')
-                print(url, text)
-                # extract_articles(url)                detail = find_div_with_text(url, text)
-                print(detail)
-                if detail:
-                    news_file.write(f"{detail}\n")
-                else:
-                    failed.write(f"{d}\n")
-                time.sleep(2)
-            except Exception as e:
-                print(f"{e}")
-    return {"message": f"Successful files save in news_detailed directory {s_name} and failed in {f_name}"}
-
-
-if __name__ == "__main__":
-    file = sys.argv[1:]
+def get_detaild_news_from_latest_file(file=None):
     if file:
         data = load_data(file[0])
     else:
-        directory  = 'news'
+        directory = 'news'
         latest_file = max(os.listdir(directory), key=lambda x: os.path.getmtime(os.path.join(directory, x)))
         data = load_data(f"news/{latest_file}")
-    with open(generate_file_name(prefix="failed"), "w", encoding='utf-8') as failed, open(
-            generate_file_name(prefix="news"), "w", encoding='utf-8') as news_file:
+    f_name = generate_file_name(prefix="failed")
+    s_name = generate_file_name(prefix="passed")
+    with open(f_name, "w", encoding='utf-8') as failed, open(s_name, "w", encoding='utf-8') as news_file:
         for index, d in enumerate(data):
             try:
                 print(f"********Going to next page [ {index + 1} of {len(data)} ] **********")
@@ -198,7 +153,13 @@ if __name__ == "__main__":
                 if detail:
                     news_file.write(f"{detail}\n")
                 else:
-                    failed.write(f"{d}\n")
+                    failed.write(f"{d['index']},{d['url']},{d['title']}\n")
                 time.sleep(2)
             except Exception as e:
                 print(f"{e}")
+    return {"message": f"Successful files save in news_detailed directory {s_name} and failed in {f_name}"}
+
+
+if __name__ == "__main__":
+    arguments = sys.argv[1:]
+    get_detaild_news_from_latest_file(arguments)
