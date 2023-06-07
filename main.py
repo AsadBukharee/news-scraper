@@ -1,13 +1,11 @@
-import subprocess
 import sys
-from typing import List, Optional, Annotated, Union
+from typing import List, Optional
 
-from fastapi import FastAPI, Response, Query, Depends
-from starlette.responses import StreamingResponse
+from fastapi import FastAPI, Query, Depends
 
-from all_google_sports_articles import get_all_from_google
+from cache.all_google_sports_articles import get_all_from_google
 from detail_brows_all import get_detaild_news_from_latest_file
-from core import scrap_event, scrap_custom,NEWS_SITES
+from core import scrap_event, scrap_custom
 
 app = FastAPI()
 worker_process = None

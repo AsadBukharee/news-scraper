@@ -1,17 +1,22 @@
-import asyncio
-import os
-
-from pyppeteer import launch
-from bs4 import BeautifulSoup
 import json
+import os
+import time
 from datetime import datetime
+
+from bs4 import BeautifulSoup
+from undetected_chromedriver import Chrome, ChromeOptions
+
 
 news = []
 base_url = "https://news.google.com/topics/CAAqKggKIiRDQkFTRlFvSUwyMHZNRFp1ZEdvU0JXVnVMVWRDR2dKUVN5Z0FQAQ?hl=ar&gl=EG&ceid=EG:ar"
-timeout = 200
 scroll_count = 8
 delay = 5
 
+chrome_options = ChromeOptions()
+# chrome_options.add_argument( '--headless' )
+# Disable JavaScript execution
+chrome_options.add_argument('--disable-javascript')
+driver = Chrome(options=chrome_options, use_subprocess=True,version_main=114)
 
 def save_local(data):
     os.makedirs("news", exist_ok=True)
@@ -26,23 +31,17 @@ def save_local(data):
 
     print(f"JSON data saved in {filename}.")
     return filename
-
-
-async def extract_articles():
-    print("Worker has started scraping the articles")
-    browser = await launch(headless=True)
-    page = await browser.newPage()
-
-    await page.goto(base_url, options={'timeout': int(timeout * 1000)})
-
-    # Scroll down multiple times to load more content
+def load_page_content():
+    driver.get(base_url)
+    # Scroll down the page multiple times to load more content
     for i in range(scroll_count):
-        print(f"Scrol count === {i + 1}")
-        await page.evaluate('window.scrollTo(0, document.body.scrollHeight)')
-        await asyncio.sleep(delay=delay)
+        print(f"Scroll count === {i + 1}")
+        driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+        time.sleep(delay)
 
-    # Extract the page content
-    content = await page.content()
+def get_page_content():
+    # Get the page content
+    content = driver.page_source
 
     # Create BeautifulSoup object
     soup = BeautifulSoup(content, 'html.parser')
@@ -63,16 +62,17 @@ async def extract_articles():
         }
         print(data)
         news.append(data)
-    await browser.close()
-    # print(news)
     print("-------------------------")
     print(len(news))
     return save_local(data=news)
 
-# async def get_all_from_google():
-#     return await extract_articles()
 
 
-if __name__=="__main__":
-    asyncio.get_event_loop().run_until_complete(extract_articles())
-    # asyncio.run(get_all_from_google())
+def main():
+    load_page_content()
+    file_name = get_page_content()
+    print(f"Saved news data in file: {file_name}")
+    driver.quit() # Close the browser
+    return file_name
+if __name__ == "__main__":
+    main()

@@ -164,8 +164,7 @@ def get_detaild_news_from_latest_file():
                 url = d.get('url')
                 text = d.get('title')
                 print(url, text)
-                # extract_articles(url)
-                detail = find_div_with_text(url, text)
+                # extract_articles(url)                detail = find_div_with_text(url, text)
                 print(detail)
                 if detail:
                     news_file.write(f"{detail}\n")
