@@ -13,7 +13,7 @@ scroll_count = 8
 delay = 5
 
 chrome_options = ChromeOptions()
-# chrome_options.add_argument( '--headless' )
+chrome_options.add_argument( '--headless' )
 # Disable JavaScript execution
 chrome_options.add_argument('--disable-javascript')
 driver = Chrome(options=chrome_options, use_subprocess=True,version_main=114)
@@ -69,6 +69,7 @@ def get_page_content():
 
 
 def main():
+    print("Started...")
     load_page_content()
     file_name = get_page_content()
     print(f"Saved news data in file: {file_name}")
