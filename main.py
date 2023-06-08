@@ -6,6 +6,7 @@ from fastapi import FastAPI, Query, Depends
 from cache.all_google_sports_articles import get_all_from_google
 from load_all_news_detail import get_detaild_news_from_latest_file
 from core import scrap_event, scrap_custom
+from load_all_news_meta import main
 
 app = FastAPI()
 worker_process = None
@@ -88,7 +89,7 @@ def get_news(news: List[str] = Depends(parse_list)):
 
 @app.get('/all-google-articles')
 async def get_news_sites():
-    name = await get_detaild_news_from_latest_file()
+    name = await main()
     return {"message": f"file saved in news: {name}"}
 
 @app.get('/start-scraping')

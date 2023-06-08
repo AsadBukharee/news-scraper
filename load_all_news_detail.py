@@ -12,11 +12,10 @@ from selenium.webdriver.support.ui import WebDriverWait
 from undetected_chromedriver import Chrome, ChromeOptions
 
 chrome_options = ChromeOptions()
-# chrome_options.headless=True
 chrome_options.add_argument('--headless')
 # Disable JavaScript execution
 chrome_options.add_argument('--disable-javascript')
-driver = Chrome(options=chrome_options, use_subprocess=True,version_main=114)
+driver = Chrome(options=chrome_options, use_subprocess=True, version_main=114)
 
 
 
