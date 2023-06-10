@@ -76,7 +76,14 @@ def load_data(file_path):
 
     # Access the loaded data
     return (data)
+def get_latest_scraped():
+    directory = 'news_detailed/passed'
 
+    latest_file = directory+"/"+max(os.listdir(directory), key=lambda x: os.path.getmtime(os.path.join(directory, x)))
+
+    with open (latest_file,'r', encoding='utf-8') as file:
+        text = file.readlines()
+        return text
 
 def get_images(div_element):
     image_elements = div_element.find_elements(By.XPATH, ".//img")
