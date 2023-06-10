@@ -95,7 +95,7 @@ async def get_news_sites():
 
 async def start_task(background_tasks: BackgroundTasks):
 
-    background_tasks.add_task(scrap_details)
+    background_tasks.add_task(get_detaild_news_from_latest_file)
 
     return {"message": "Task has been started in the background."}
   
