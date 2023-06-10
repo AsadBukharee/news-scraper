@@ -106,7 +106,7 @@ async def get_news_sites():
     print('Request received')
     text = get_latest_scraped()
     if text:
-        return PlainTextResponse(text)
+        return PlainTextResponse(f"{text}")
     else:
         return {"data": "error"}
         
