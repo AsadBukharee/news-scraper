@@ -159,6 +159,8 @@ def get_detaild_news_from_latest_file(file=None):
     driver.quit()
     return {"message": f"Successful files save in news_detailed directory {s_name} and failed in {f_name}"}
 
+    
+
 
 if __name__ == "__main__":
     arguments = sys.argv[1:]
