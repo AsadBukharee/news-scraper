@@ -1,7 +1,7 @@
 import sys
 from typing import List, Optional
 
-from fastapi import FastAPI, Query, Depends
+from fastapi import FastAPI, Query, Depends, BackgroundTasks
 
 from cache.all_google_sports_articles import get_all_from_google
 from load_all_news_detail import get_detaild_news_from_latest_file
@@ -91,7 +91,16 @@ def get_news(news: List[str] = Depends(parse_list)):
 async def get_news_sites():
     name = await main()
     return {"message": f"file saved in news: {name}"}
+@app.post("/start-detail-task")
 
+async def start_task(background_tasks: BackgroundTasks):
+
+    background_tasks.add_task(scrap_details)
+
+    return {"message": "Task has been started in the background."}
+  
+  
+  
 @app.get('/start-scraping')
 async def get_news_sites():
     print('Request received')
