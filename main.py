@@ -5,7 +5,7 @@ from fastapi import FastAPI, Query, Depends, BackgroundTasks
 
 
 from load_all_news_detail import get_detaild_news_from_latest_file
-from core import scrap_event, scrap_custom
+from core import scrap_event, scrap_custom, NEWS_SITES
 from load_all_news_meta import main
 
 app = FastAPI()
