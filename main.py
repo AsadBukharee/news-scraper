@@ -2,9 +2,9 @@ import sys
 from typing import List, Optional
 
 from fastapi import FastAPI, Query, Depends, BackgroundTasks
+from fastapi.responses import PlainTextResponse
 
-
-from load_all_news_detail import get_detaild_news_from_latest_file
+from load_all_news_detail import get_detaild_news_from_latest_file,get_latest_scraped
 from core import scrap_event, scrap_custom, NEWS_SITES
 from load_all_news_meta import main
 
@@ -101,12 +101,15 @@ async def start_task(background_tasks: BackgroundTasks):
   
   
   
-@app.get('/start-scraping')
+@app.get('/get-latest-scraped')
 async def get_news_sites():
     print('Request received')
-    name = await get_all_from_google()
-    return {"message": f"file saved in news: {name}"}
-
+    text = get_latest_scraped()
+    if text:
+        return PlainTextResponse(text)
+    else:
+        return {"data": "error"}
+        
 
 if __name__=="__main__":
     news = arguments = sys.argv[1:]#['elbalad','filgoal']
