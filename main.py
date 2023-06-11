@@ -3,9 +3,9 @@ from typing import List, Optional
 
 from fastapi import FastAPI, Query, Depends
 
-from cache.all_google_sports_articles import get_all_from_google
+
 from load_all_news_detail import get_detaild_news_from_latest_file
-from core import scrap_event, scrap_custom
+from core import scrap_event, scrap_custom,NEWS_SITES
 from load_all_news_meta import main
 
 app = FastAPI()
@@ -62,20 +62,20 @@ def shutdown_event():
     print("News server is shutting down")
 
 
-@app.get('/word-count')
+@app.get('/word-count',description="You can set the threshold words count, by default it is 150")
 def set_word_count(count: int = 200):
     global WORDS_COUNT
     WORDS_COUNT = count
     return {"message": f"word count set to {count}", "data": []}
 
 
-@app.get('/news-sites')
+@app.get('/news-sites',description="it provides the list of available news sites. for manual scraping")
 def get_news_sites():
     global NEWS_SITES
     return {"message": f"Available news sites: {NEWS_SITES}"}
 
 
-@app.get("/sources")
+@app.get("/sources",description="enter the news sites form available news sites or enter nothing to scrap from google")
 def get_news(news: List[str] = Depends(parse_list)):
     """ list param method """
     # print(news)
@@ -84,19 +84,21 @@ def get_news(news: List[str] = Depends(parse_list)):
         results = scrap_custom(news)
         return {"message": results}
     else:
-        return {"message": scrap_event()}
+        name = await main()
+        return {"message": f"A background service has started and it will save the articles meta in a news directory, tas ID : {name}"}
         # return Response(scrap_event(), media_type="text/plain")
 
-@app.get('/all-google-articles')
+@app.get('/all-google-articles',description="Scrapes all news sports articles meta data and saves in news article,")
 async def get_news_sites():
     name = await main()
+    # get_detaild_news_from_latest_file(file=None)
     return {"message": f"file saved in news: {name}"}
 
-@app.get('/start-scraping')
-async def get_news_sites():
-    print('Request received')
-    name = await get_all_from_google()
-    return {"message": f"file saved in news: {name}"}
+# @app.get('/start-scraping')
+# async def get_news_sites():
+#     print('Request received')
+#     name = await get_all_from_google()
+#     return {"message": f"file saved in news: {name}"}
 
 
 if __name__=="__main__":
