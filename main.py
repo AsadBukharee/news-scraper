@@ -1,16 +1,17 @@
+import asyncio
 import os
 import sys
 from typing import List, Optional
 from fastapi import FastAPI, Query, Depends, BackgroundTasks
 from fastapi.responses import PlainTextResponse
 from starlette.responses import RedirectResponse
-from load_all_news_detail import get_detaild_news_from_latest_file, get_latest_scraped
+from load_all_news_detail import get_detaild_news_from_latest_file, get_latest_scraped, driver
 from core import scrap_event, scrap_custom, NEWS_SITES
 from load_all_news_meta import main
 
 app = FastAPI()
 worker_process = None
-
+background_tasks_ = []
 
 def parse_list(news: Optional[List[str]] = Query(None, title="News Sites",
                                                  description=f"Select from this list of news sites  {NEWS_SITES}")) -> \
@@ -57,13 +58,17 @@ async def startup_event():
 
 
 @app.on_event("shutdown")
-def shutdown_event():
+async def shutdown_event():
     print("News server is shutting down")
 
+@app.get("/kill-atsks")
+async def root():
+    driver.close()
 @app.get("/")
 async def root():
     # Redirect the root URL to the API documentation
     return RedirectResponse(url="/docs")
+
 @app.get('/word-count', description="You can set the threshold words count, by default it is 150")
 def set_word_count(count: int = 200):
     global WORDS_COUNT
@@ -102,19 +107,20 @@ async def get_news_sites():
 @app.post("/start-detail-task",
           description="It returns nothing, instead starts a background srvice that scraps news from meta files and saves in a directory")
 async def start_task(background_tasks: BackgroundTasks):
-    background_tasks.add_task(get_detaild_news_from_latest_file)
-    return {"message": "Task has been started in the background."}
+    task = background_tasks.add_task(get_detaild_news_from_latest_file)
+    background_tasks_.append(task)
+    return {"message": f"Task has been started in the background.{task}"}
 
 
-@app.get('/scraped-files-list')
+@app.get('/scraped-files-list', description="It returns the list of available scrapped files.")
 async def scraped_files_list():
     directory = 'news_detailed/passed'
-    files = await os.listdir(directory)
+    files = os.listdir(directory)
     return {"available files": f"{files}"}
 
 
 @app.get('/get-latest-scraped/{file_name}')
-async def get_news_sites(file_name: str = Optional):
+async def get_news_sites(file_name: str = None):
     print(f'Request received for {file_name}')
     text = get_latest_scraped(file_name=file_name)
     if text:
