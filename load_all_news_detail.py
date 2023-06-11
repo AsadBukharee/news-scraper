@@ -18,7 +18,6 @@ chrome_options.add_argument('--disable-javascript')
 driver = Chrome(options=chrome_options, use_subprocess=True, version_main=114)
 
 
-
 def remove_special_characters(string):
     pattern = r'[^\w\s\u0600-\u06FF\u0750-\u077F]'  # Matches any character that is not Arabic, alphanumeric, or whitespace
     cleaned_string = re.sub(pattern, '', string)
@@ -76,6 +75,18 @@ def load_data(file_path):
 
     # Access the loaded data
     return (data)
+
+
+def get_latest_scraped(file_name=None):
+    directory = 'news_detailed/passed'
+    if not file_name:
+        latest_file = directory + "/" + max(os.listdir(directory),
+                                            key=lambda x: os.path.getmtime(os.path.join(directory, x)))
+    else:
+        latest_file = directory+"/"+file_name
+    with open(latest_file, 'r', encoding='utf-8') as file:
+        text = file.readlines()
+        return text
 
 
 def get_images(div_element):

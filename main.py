@@ -1,16 +1,15 @@
+import os
 import sys
 from typing import List, Optional
-
-from fastapi import FastAPI, Query, Depends
-
-
-from load_all_news_detail import get_detaild_news_from_latest_file
-from core import scrap_event, scrap_custom,NEWS_SITES
+from fastapi import FastAPI, Query, Depends, BackgroundTasks
+from fastapi.responses import PlainTextResponse
+from starlette.responses import RedirectResponse
+from load_all_news_detail import get_detaild_news_from_latest_file, get_latest_scraped
+from core import scrap_event, scrap_custom, NEWS_SITES
 from load_all_news_meta import main
 
 app = FastAPI()
 worker_process = None
-
 
 
 def parse_list(news: Optional[List[str]] = Query(None, title="News Sites",
@@ -61,48 +60,71 @@ async def startup_event():
 def shutdown_event():
     print("News server is shutting down")
 
-
-@app.get('/word-count',description="You can set the threshold words count, by default it is 150")
+@app.get("/")
+async def root():
+    # Redirect the root URL to the API documentation
+    return RedirectResponse(url="/docs")
+@app.get('/word-count', description="You can set the threshold words count, by default it is 150")
 def set_word_count(count: int = 200):
     global WORDS_COUNT
     WORDS_COUNT = count
     return {"message": f"word count set to {count}", "data": []}
 
 
-@app.get('/news-sites',description="it provides the list of available news sites. for manual scraping")
+@app.get('/news-sites', description="it provides the list of available news sites. for manual scraping")
 def get_news_sites():
     global NEWS_SITES
     return {"message": f"Available news sites: {NEWS_SITES}"}
 
 
-@app.get("/sources",description="enter the news sites form available news sites or enter nothing to scrap from google")
-def get_news(news: List[str] = Depends(parse_list)):
+@app.get("/sources", description="enter the news sites form available news sites or enter nothing to scrap from google")
+async def get_news(news: List[str] = Depends(parse_list)):
     """ list param method """
     # print(news)
     if news:
         """scrap from the given news sources"""
-        results = scrap_custom(news)
+        results = await scrap_custom(news)
         return {"message": results}
     else:
         name = await main()
-        return {"message": f"A background service has started and it will save the articles meta in a news directory, tas ID : {name}"}
+        return {
+            "message": f"A background service has started and it will save the articles meta in a news directory, tas ID : {name}"}
         # return Response(scrap_event(), media_type="text/plain")
 
-@app.get('/all-google-articles',description="Scrapes all news sports articles meta data and saves in news article,")
+
+@app.get('/all-google-articles', description="Scrapes all news sports articles meta data and saves in news article,")
 async def get_news_sites():
     name = await main()
     # get_detaild_news_from_latest_file(file=None)
     return {"message": f"file saved in news: {name}"}
 
-# @app.get('/start-scraping')
-# async def get_news_sites():
-#     print('Request received')
-#     name = await get_all_from_google()
-#     return {"message": f"file saved in news: {name}"}
+
+@app.post("/start-detail-task",
+          description="It returns nothing, instead starts a background srvice that scraps news from meta files and saves in a directory")
+async def start_task(background_tasks: BackgroundTasks):
+    background_tasks.add_task(get_detaild_news_from_latest_file)
+    return {"message": "Task has been started in the background."}
 
 
-if __name__=="__main__":
-    news = arguments = sys.argv[1:]#['elbalad','filgoal']
+@app.get('/scraped-files-list')
+async def scraped_files_list():
+    directory = 'news_detailed/passed'
+    files = await os.listdir(directory)
+    return {"available files": f"{files}"}
+
+
+@app.get('/get-latest-scraped/{file_name}')
+async def get_news_sites(file_name: str = Optional):
+    print(f'Request received for {file_name}')
+    text = get_latest_scraped(file_name=file_name)
+    if text:
+        return PlainTextResponse(f"{text}")
+    else:
+        return {"data": "error"}
+
+
+if __name__ == "__main__":
+    news = arguments = sys.argv[1:]  # ['elbalad','filgoal']
     print(news)
     if news:
         """scrap from the given news sources"""
