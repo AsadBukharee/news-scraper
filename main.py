@@ -99,7 +99,7 @@ async def get_news(news: List[str] = Depends(parse_list)):
 
 @app.get('/all-google-articles', description="Scrapes all news sports articles meta data and saves in news article,")
 async def get_news_sites():
-    name = await main()
+    name = main()
     # get_detaild_news_from_latest_file(file=None)
     return {"message": f"file saved in news: {name}"}
 
